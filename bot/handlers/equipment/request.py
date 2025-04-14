@@ -1,3 +1,7 @@
+from telegram import Update
+from telegram.ext import CallbackContext
+
+
 def handle_request_equipment(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     query.answer()
