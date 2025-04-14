@@ -1,57 +1,76 @@
-def handle_problem_solved_button(update: Update, context: CallbackContext) -> None:
+from telegram import Update
+from telegram.ext import CallbackContext
+import asyncio
+
+
+async def handle_problem_solved_button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
-    print(f"[DEBUG] Callback data: {query.data}")  # Проверьте вывод в консоли
+    print(f"[DEBUG] Callback data: {query.data}")
 
-    # Извлекаем unique_id из callback_data
     if not query.data.startswith('problem_solved_'):
         return
 
-    unique_id = query.data.split('_')[2]  # Формат: 'problem_solved_{unique_id}'
-    handle_problem_solved(update, context, unique_id)
+    unique_id = query.data.split('_')[2]
+    await handle_problem_solved(update, context, unique_id)
 
-def handle_problem_solved(update: Update, context: CallbackContext, unique_id: str) -> None:
-    """
-    Обрабатывает нажатие кнопки "Проблема решена!" и удаляет сообщения из канала, группы и открепляет сообщение.
-    """
+async def handle_problem_solved(update: Update, context: CallbackContext, unique_id: str) -> None:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
-    # Получаем данные для этого сообщения
+    # Получаем данные сообщения
     message_data = context.user_data.get(unique_id, {})
     if not message_data:
-        query.edit_message_text("❌ Ошибка: данные сообщения не найдены.")
+        await query.edit_message_text("❌ Ошибка: данные сообщения не найдены.")
         return
 
-    # Удаляем сообщение из канала
+    # Параллельное удаление сообщений
+    delete_tasks = []
     if 'channel_message_id' in message_data:
-        try:
-            context.bot.delete_message(chat_id=CHANNEL_ID, message_id=message_data['channel_message_id'])
-        except Exception as e:
-            print(f"Ошибка удаления сообщения из канала: {e}")
-
-    # Удаляем сообщение из группы
+        delete_tasks.append(
+            context.bot.delete_message(
+                chat_id=CHANNEL_ID,
+                message_id=message_data['channel_message_id']
+            )
+        )
+    
     if 'group_message_id' in message_data:
-        try:
-            context.bot.delete_message(chat_id=GROUP_ID, message_id=message_data['group_message_id'])
-        except Exception as e:
-            print(f"Ошибка удаления сообщения из группы: {e}")
+        delete_tasks.append(
+            context.bot.delete_message(
+                chat_id=GROUP_ID,
+                message_id=message_data['group_message_id']
+            )
+        )
 
-    # Открепляем сообщение в диалоге с ботом
-    sender = next((u for u in users_data if str(u['код']) == context.user_data.get('code')), None)
+    # Запускаем все задачи удаления параллельно
+    results = await asyncio.gather(*delete_tasks, return_exceptions=True)
+    for result in results:
+        if isinstance(result, Exception):
+            print(f"Ошибка удаления сообщения: {result}")
+
+    # Открепление сообщения
+    if 'users_data' not in context.bot_data:
+        context.bot_data['users_data'] = await load_users_data_async()
+
+    sender = next((u for u in context.bot_data['users_data'] 
+                  if str(u['код']) == context.user_data.get('code')), None)
+    
     if sender and 'group_message_id' in message_data:
         try:
-            context.bot.unpin_chat_message(chat_id=sender['id'], message_id=message_data['group_message_id'])
-            print(f"[DEBUG] Сообщение {message_data['group_message_id']} откреплено.")  # Отладочный вывод
+            await context.bot.unpin_chat_message(
+                chat_id=sender['id'],
+                message_id=message_data['group_message_id']
+            )
+            print(f"[DEBUG] Сообщение {message_data['group_message_id']} откреплено.")
         except Exception as e:
             print(f"Ошибка открепления сообщения: {e}")
 
-    # Редактируем сообщение с кнопками, чтобы отобразить текст "Проблема решена"
+    # Обновление интерфейса
     try:
-        query.edit_message_text("✅ Проблема отмечена как решенная. Сообщения удалены и откреплены.")
+        await query.edit_message_text("✅ Проблема отмечена как решенная. Сообщения удалены и откреплены.")
     except Exception as e:
         print(f"Ошибка редактирования сообщения: {e}")
 
-    # Удаляем данные для этого сообщения
+    # Очистка данных
     context.user_data.pop(unique_id, None)
