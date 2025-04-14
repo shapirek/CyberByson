@@ -1,98 +1,111 @@
-def handle_recipient_choice(update: Update, context: CallbackContext) -> int:
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext, ConversationHandler
+import asyncio  # Для асинхронной версии
+from functools import partial  # Для частичного применения функций
+
+
+async def handle_recipient_choice(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
     data = query.data
+
+    # Кэширование данных пользователей
+    if 'users_data' not in context.bot_data:
+        context.bot_data['users_data'] = await load_users_data_async()
+
+    users_data = context.bot_data['users_data']
 
     if data == 'back_to_previous_menu':
         sender = next((u for u in users_data if str(u['код']) == context.user_data.get('code')), None)
         if not sender:
-            query.edit_message_text("❌ Ошибка: отправитель не найден!")
+            await query.edit_message_text("❌ Ошибка: отправитель не найден!")
             return ConversationHandler.END
 
-        if sender['статус'] == '0':
-            return show_director_menu(update, context)
-        else:
-            return show_staff_menu(update, context)
-    elif data == 'write_to_department':
-        return show_directions_menu(update, context)
-    elif data == 'write_to_team_leaders':
-        return show_team_leaders_menu(update, context)
-    elif data == 'write_to_tournament_judges':
-        return show_tournament_judges_menu(update, context)
-    elif data == 'write_to_director':
-        context.user_data['recipient_type'] = 'director'
-        query.edit_message_text(text="Введите послание:")
-        return INPUT_MESSAGE
-    elif data == 'write_to_all_staff':
-        context.user_data['recipient_type'] = 'all_staff'
-        query.edit_message_text(text="Введите послание:")
-        return INPUT_MESSAGE
-    else:
-        context.user_data['recipient'] = data
-        query.edit_message_text(text="Введите послание:")
-        return INPUT_MESSAGE
+        return await (show_director_menu if sender['статус'] == '0' else show_staff_menu)(update, context)
 
-def handle_wait_for_response(update: Update, context: CallbackContext) -> int:
+    # Оптимизация через словарь обработчиков
+    handlers = {
+        'write_to_department': show_directions_menu,
+        'write_to_team_leaders': show_team_leaders_menu,
+        'write_to_tournament_judges': show_tournament_judges_menu,
+        'write_to_director': partial(set_recipient_and_prompt, 'director'),
+        'write_to_all_staff': partial(set_recipient_and_prompt, 'all_staff')
+    }
+
+    if data in handlers:
+        return await handlers[data](update, context)
+    
+    # Обработка произвольного получателя
+    context.user_data['recipient'] = data
+    await query.edit_message_text(text="Введите послание:")
+    return INPUT_MESSAGE
+
+async def set_recipient_and_prompt(recipient_type: str, update: Update, context: CallbackContext) -> int:
+    context.user_data['recipient_type'] = recipient_type
+    await update.callback_query.edit_message_text(text="Введите послание:")
+    return INPUT_MESSAGE
+
+async def handle_wait_for_response(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
     data = query.data
 
-    # Получаем текст сообщения из context.user_data
-    message_text = context.user_data.get('message_text')
-    recipient_type = context.user_data.get('recipient_type')
+    # Проверка данных
+    if not all(key in context.user_data for key in ['message_text', 'recipient_type']):
+        await query.edit_message_text("❌ Ошибка: недостаточно данных!")
+        return ConversationHandler.END
 
-    # Получаем отправителя
+    # Кэширование данных пользователей
+    if 'users_data' not in context.bot_data:
+        context.bot_data['users_data'] = await load_users_data_async()
+
+    users_data = context.bot_data['users_data']
     sender = next((u for u in users_data if str(u['код']) == context.user_data.get('code')), None)
     if not sender:
-        query.edit_message_text("❌ Ошибка: отправитель не найден!")
+        await query.edit_message_text("❌ Ошибка: отправитель не найден!")
         return ConversationHandler.END
 
-    if data == 'wait_for_response_no':
-        # Если выбран вариант "Нет", отправляем сообщение как обычно
-        if recipient_type == 'direction':
-            send_message_to_direction(update, context)
-        elif recipient_type == 'team':
-            send_message_to_team(update, context)
-        elif recipient_type == 'director':
-            send_message_to_director(update, context)
-        elif recipient_type == 'all_staff':
-            send_message_to_all_staff(update, context)
-        elif recipient_type == 'tournament_judges':
-            send_message_to_tournament_judges(update, context)
-        else:
-            query.edit_message_text("❌ Ошибка: тип получателя не определен!")
-            return ConversationHandler.END
+    # Оптимизация через словарь обработчиков
+    response_handlers = {
+        'wait_for_response_no': handle_no_response,
+        'wait_for_response_yes': handle_yes_response
+    }
 
-        # Отправляем копию отправителю без кнопок
-        send_plain_copy_to_sender(update, context, message_text)
+    if data in response_handlers:
+        return await response_handlers[data](update, context, sender)
+    
+    await query.edit_message_text("❌ Неизвестная команда.")
+    return ConversationHandler.END
 
-        # Возвращаем в меню
-        if sender['статус'] == '0':  # Если отправитель — дирекция
-            return show_director_menu(update, context)
-        else:  # Если отправитель — сотрудник
-            return show_staff_menu(update, context)
+async def handle_no_response(update: Update, context: CallbackContext, sender: dict) -> int:
+    recipient_type = context.user_data['recipient_type']
+    message_text = context.user_data['message_text']
 
-    elif data == 'wait_for_response_yes':
-        # Если выбран вариант "Да", отправляем сообщение с кнопкой, копию отправителю и в канал
-        if recipient_type == 'direction':
-            send_message_with_button(update, context, recipient_type, direction=context.user_data.get('selected_direction'))
-        elif recipient_type == 'team':
-            send_message_with_button(update, context, recipient_type, team=context.user_data.get('selected_team'))
-        elif recipient_type == 'director':
-            send_message_with_button(update, context, recipient_type)
-        elif recipient_type == 'all_staff':
-            send_message_with_button(update, context, recipient_type)
-        elif recipient_type == 'tournament_judges':
-            send_message_with_button(update, context, recipient_type, tournament=context.user_data.get('selected_tournament'))
-        else:
-            query.edit_message_text("❌ Ошибка: тип получателя не определен!")
-            return ConversationHandler.END
+    # Словарь обработчиков отправки
+    send_handlers = {
+        'direction': send_message_to_direction,
+        'team': send_message_to_team,
+        'director': send_message_to_director,
+        'all_staff': send_message_to_all_staff,
+        'tournament_judges': send_message_to_tournament_judges
+    }
 
-        # Возвращаем в меню
-        if sender['статус'] == '0':  # Если отправитель — дирекция
-            return show_director_menu(update, context)
-        else:  # Если отправитель — сотрудник
-            return show_staff_menu(update, context)
-    else:
-        query.edit_message_text("❌ Неизвестная команда.")
+    if recipient_type not in send_handlers:
+        await update.callback_query.edit_message_text("❌ Ошибка: тип получателя не определен!")
         return ConversationHandler.END
+
+    await send_handlers[recipient_type](update, context)
+    await send_plain_copy_to_sender(update, context, message_text)
+
+    return await (show_director_menu if sender['статус'] == '0' else show_staff_menu)(update, context)
+
+async def handle_yes_response(update: Update, context: CallbackContext, sender: dict) -> int:
+    recipient_type = context.user_data['recipient_type']
+    extra_data = {
+        'direction': context.user_data.get('selected_direction'),
+        'team': context.user_data.get('selected_team'),
+        'tournament': context.user_data.get('selected_tournament')
+    }.get(recipient_type)
+
+    await send_message_with_button(update, context, recipient_type, extra_data)
+    return await (show_director_menu if sender['статус'] == '0' else show_staff_menu)(update, context)
