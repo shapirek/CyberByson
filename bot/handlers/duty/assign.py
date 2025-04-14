@@ -1,3 +1,6 @@
+from telegram import Update
+from telegram.ext import CallbackContext
+
 def handle_assign_duty(update: Update, context: CallbackContext) -> int:
     """Обрабатывает нажатие кнопки 'Выдать наряд'."""
     query = update.callback_query
