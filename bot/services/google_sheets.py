@@ -1,105 +1,75 @@
-def read_google_sheet(sheet_url):
-    # Заменяем часть URL для экспорта в CSV
+import requests
+import chardet
+import csv
+from io import StringIO
+from typing import List, Dict
+from your_date_utils import normalize_table_date  # ваш модуль для работы с датами
+
+
+import aiohttp
+from aiohttp import ClientTimeout
+
+async def async_read_google_sheet(sheet_url: str, gid: str = None) -> List[Dict]:
+    """Универсальная асинхронная функция для чтения Google Sheets"""
+    base_url = sheet_url.replace('/edit', '/export?format=csv')
+    url = f"{base_url}&gid={gid}" if gid else base_url
+    
+    timeout = ClientTimeout(total=10)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.get(url) as response:
+            if response.status != 200:
+                raise Exception(f"Ошибка загрузки: {response.status}")
+            
+            raw_data = await response.read()
+            encoding = chardet.detect(raw_data)['encoding']
+            decoded_data = raw_data.decode(encoding)
+            
+            return list(csv.DictReader(decoded_data.splitlines()))
+
+from functools import lru_cache
+import time
+
+@lru_cache(maxsize=3)
+def read_google_sheet_cached(sheet_url: str) -> List[Dict]:
+    """Кэширование на 5 минут"""
+    return read_google_sheet(sheet_url)
+
+def parse_sheet_data(reader, columns_mapping: Dict) -> List[Dict]:
+    """Универсальный парсер для разных листов"""
+    return [
+        {key: row[idx] for key, idx in columns_mapping.items() if idx < len(row)}
+        for row in reader
+    ]
+
+def read_google_sheet(sheet_url: str) -> List[Dict]:
+    columns_mapping = {
+        'код': 0, 'id': 1, 'имя': 2, 
+        'фамилия': 3, 'статус': 4, 'направление': 5,
+        'команда': 6, 'судья': 7, 'технозондер': 8, 'псин': 9
+    }
+    return _read_sheet(sheet_url, columns_mapping)
+
+def read_google_sheet_sheet2(sheet_url: str) -> List[Dict]:
+    columns_mapping = {
+        'фамилия': 0, 'имя': 1, 'отчество': 2,
+        'команда': 3, 'контакты': 4
+    }
+    return _read_sheet(sheet_url, columns_mapping, gid="GID_kids")
+
+def _read_sheet(sheet_url: str, columns_mapping: Dict, gid: str = None) -> List[Dict]:
+    """Базовая функция для чтения листов"""
     csv_url = sheet_url.replace('/edit', '/export?format=csv')
-
-    # Загружаем данные
-    response = requests.get(csv_url)
-    if response.status_code != 200:
-        raise Exception("Не удалось загрузить таблицу. Проверьте ссылку и доступ.")
-
-    # Определяем кодировку данных
+    if gid:
+        csv_url += f"&gid={gid}"
+    
+    response = requests.get(csv_url, timeout=10)
+    response.raise_for_status()
+    
     raw_data = response.content
     encoding = chardet.detect(raw_data)['encoding']
-
-    # Декодируем данные с использованием определенной кодировки
     decoded_data = raw_data.decode(encoding)
-
-    # Читаем CSV
-    csv_data = StringIO(decoded_data)
-    reader = csv.reader(csv_data)
-
-    # Преобразуем данные в список словарей с указанием индексов колонок
-    users_data = []
-    for row in reader:
-        if len(row) >= 9:  # Убедимся, что строка содержит все необходимые колонки
-            user = {
-                'код': row[0],        # 1-ая колонка
-                'id': row[1],         # 2-ая колонка (ID телеграма)
-                'имя': row[2],        # 3-я колонка
-                'фамилия': row[3],    # 4-ая колонка (фамилия)
-                'статус': row[4],     # 5-ая колонка
-                'направление': row[5], # 6-ая колонка
-                'команда': row[6],    # 7-ая колонка (команда)
-                'судья': row[7],      # 8-ая колонка (судья)
-                'технозондер': row[8], # 9-ая колонка (технозондер)
-                'псин': row[9] # 10-ая колонка (псин)
-            }
-            users_data.append(user)
-
-    return users_data
-
-def read_google_sheet_sheet2(sheet_url):
-    """
-    Загружает данные из второй вкладки (Лист2) таблицы Google Sheets.
-    """
-    # Заменяем часть URL для экспорта в CSV и указываем gid второй вкладки
-    csv_url = sheet_url.replace('/edit', '/export?format=csv&gid=GID_kids')
-
-    # Загружаем данные
-    response = requests.get(csv_url)
-    if response.status_code != 200:
-        raise Exception("Не удалось загрузить таблицу. Проверьте ссылку и доступ.")
-
-    # Определяем кодировку данных
-    raw_data = response.content
-    encoding = chardet.detect(raw_data)['encoding']
-
-    # Декодируем данные с использованием определенной кодировки
-    decoded_data = raw_data.decode(encoding)
-
-    # Читаем CSV
-    csv_data = StringIO(decoded_data)
-    reader = csv.reader(csv_data)
-
-    # Преобразуем данные в список словарей с указанием индексов колонок
-    parents_data = []
-    for row in reader:
-        if len(row) >= 5:  # Убедимся, что строка содержит все необходимые колонки
-            parent = {
-                'фамилия': row[0],        # 1-ая колонка
-                'имя': row[1],    # 2-ая колонка
-                'отчество': row[2],   # 3-я колонка
-                'команда': row[3],    # 4-ая колонка
-                'контакты': row[4]    # 5-ая колонка
-            }
-            parents_data.append(parent)
-
-    return parents_data
-
-def read_schedule_sheet(sheet_url: str) -> list:
-    """
-    Читает данные из таблицы расписания с нормализацией дат
-    """
-    csv_url = sheet_url.replace('/edit', '/export?format=csv')
-
-    try:
-        response = requests.get(csv_url)
-        response.raise_for_status()
-
-        raw_data = response.content
-        encoding = chardet.detect(raw_data)['encoding']
-        decoded_data = raw_data.decode(encoding)
-
-        reader = csv.DictReader(decoded_data.splitlines())
-
-        # Нормализуем даты в каждой строке
-        normalized_data = []
-        for row in reader:
-            if 'дата' in row:
-                row['дата'] = normalize_table_date(row['дата'])
-            normalized_data.append(row)
-
-        return normalized_data
-
-    except Exception as e:
-        raise Exception(f"Ошибка загрузки расписания: {str(e)}")
+    
+    reader = csv.reader(decoded_data.splitlines())
+    next(reader)  # Пропускаем заголовок
+    
+    return parse_sheet_data(reader, columns_mapping)
