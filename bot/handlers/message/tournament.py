@@ -1,16 +1,25 @@
-def handle_tournament_choice(update: Update, context: CallbackContext) -> int:
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
+
+async def handle_tournament_choice(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
     data = query.data
 
-    if data.startswith('tournament_'):
-        tournament = data.split('_')[1]
-        context.user_data['selected_tournament'] = tournament  # Сохраняем выбранный турнир
-        context.user_data['recipient_type'] = 'tournament_judges'  # Тип получателя — судьи турнира
-        query.edit_message_text(text=f"Введите сообщение для судей {tournament}:")
-        return INPUT_MESSAGE
-    elif data == 'back_to_message_options':
-        return show_message_options(update, context)
-    else:
-        query.edit_message_text("❌ Неизвестный турнир.")
-        return ConversationHandler.END
+    # Оптимизация через match-case (Python 3.10+)
+    match data.split('_'):
+        case ['tournament', tournament]:
+            context.user_data.update({
+                'selected_tournament': tournament,
+                'recipient_type': 'tournament_judges'
+            })
+            await query.edit_message_text(text=f"Введите сообщение для судей {tournament}:")
+            return INPUT_MESSAGE
+            
+        case _ if data == 'back_to_message_options':
+            return await show_message_options(update,context)
+            
+        case _:
+            await query.edit_message_text("❌ Неизвестный турнир.")
+            return ConversationHandler.END
