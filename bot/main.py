@@ -1,3 +1,36 @@
+import csv
+from io import StringIO
+from telegram import (
+    Update,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+    ConversationHandler,
+    CallbackContext
+)
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import requests
+import chardet
+import time
+import logging
+from datetime import datetime, timedelta
+from telegram.utils.helpers import escape_markdown
+
+import yake
+import uuid
+from fuzzywuzzy import process
+
+import pytz
+
 def main() -> None:
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
