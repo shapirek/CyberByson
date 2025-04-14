@@ -1,38 +1,44 @@
-def handle_message_for_child_input(update: Update, context: CallbackContext) -> int:
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+import asyncio  # Для асинхронной версии
+from functools import partial  # Для частичного применения функций
+
+
+async def handle_message_for_child_input(update: Update, context: CallbackContext) -> int:
     """
-    Обрабатывает ввод сообщения для ребенка и отправляет его вожатым.
+    Асинхронно обрабатывает и отправляет сообщение для ребенка вожатым.
     """
-    message_text = update.message.text.strip()  # Получаем текст сообщения
+    message_text = update.message.text.strip()
 
-    # Получаем данные ребенка из context
-    selected_child = context.user_data.get('selected_child')
-    if not selected_child:
-        update.message.reply_text("❌ Ошибка: данные ребенка не найдены.")
+    # Проверка данных ребенка
+    if not (selected_child := context.user_data.get('selected_child')):
+        await update.message.reply_text("❌ Ошибка: данные ребенка не найдены.")
         return ConversationHandler.END
 
-    # Загружаем данные из таблицы TABULA (сотрудники)
-    try:
-        staff_data = read_google_sheet(TABULA)
-    except Exception as e:
-        print(f"Ошибка загрузки данных: {e}")
-        update.message.reply_text("⚠️ Ошибка загрузки данных. Попробуйте позже.")
+    # Кэширование данных сотрудников
+    if 'staff_data' not in context.bot_data:
+        try:
+            context.bot_data['staff_data'] = await async_read_google_sheet(TABULA)
+        except Exception as e:
+            print(f"Ошибка загрузки данных: {e}")
+            await update.message.reply_text("⚠️ Ошибка загрузки данных. Попробуйте позже.")
+            return ConversationHandler.END
+
+    staff_data = context.bot_data['staff_data']
+    
+    # Проверка команды ребенка
+    if not (child_team := selected_child.get('команда')):
+        await update.message.reply_text("❌ Ошибка: не удалось определить команду ребенка.")
         return ConversationHandler.END
 
-    # Получаем команду выбранного ребенка
-    child_team = selected_child.get('команда')
-
-    if not child_team:
-        update.message.reply_text("❌ Ошибка: не удалось определить команду ребенка.")
-        return ConversationHandler.END
-
-    # Находим сотрудников с совпадающей командой
+    # Поиск вожатых команды
     matched_staff = [staff for staff in staff_data if staff.get('команда') == child_team]
-
+    
     if not matched_staff:
-        update.message.reply_text("❌ Не найдено вожатых для команды ребенка.")
+        await update.message.reply_text("❌ Не найдено вожатых для команды ребенка.")
         return ConversationHandler.END
 
-    # Формируем сообщение для вожатых
+    # Формирование сообщения
     message_for_staff = (
         f"🙏 РОДИТЕЛИ ПЕРЕДАЮТ 🙏\n\n"
         f"{selected_child['имя']} {selected_child['фамилия']}\n\n"
@@ -40,18 +46,22 @@ def handle_message_for_child_input(update: Update, context: CallbackContext) -> 
         f"{message_text}"
     )
 
-    # Отправляем сообщение каждому вожатому
-    for staff in matched_staff:
-        try:
-            context.bot.send_message(
-                chat_id=staff['id'],  # ID сотрудника
-                text=message_for_staff
-            )
-        except Exception as e:
-            print(f"Ошибка отправки сообщения {staff['id']}: {e}")
+    # Асинхронная массовая отправка
+    send_tasks = [
+        context.bot.send_message(
+            chat_id=staff['id'],
+            text=message_for_staff
+        )
+        for staff in matched_staff
+    ]
+    
+    # Обработка результатов отправки
+    results = await asyncio.gather(*send_tasks, return_exceptions=True)
+    successful_sends = sum(1 for r in results if not isinstance(r, Exception))
+    
+    for staff, result in zip(matched_staff, results):
+        if isinstance(result, Exception):
+            print(f"Ошибка отправки {staff['id']}: {result}")
 
-    # Уведомляем отправителя об успешной отправке
-    update.message.reply_text("✅ Сообщение отправлено вожатым команды!")
-
-    # Возвращаемся в главное меню
-    return show_parents_menu(update, context)
+    await update.message.reply_text(f"✅ Сообщение отправлено {successful_sends}/{len(matched_staff)} вожатым!")
+    return await show_parents_menu(update, context)
