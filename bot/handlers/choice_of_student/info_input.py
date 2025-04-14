@@ -70,37 +70,3 @@ def handle_student_info_input(update: Update, context: CallbackContext) -> int:
     context.user_data['matched_students'] = matched_parents
 
     return CHOOSE_STUDENT
-
-def handle_student_choice(update: Update, context: CallbackContext) -> int:
-    """
-    Обрабатывает выбор школьника из списка.
-    """
-    query = update.callback_query
-    query.answer()
-
-    # Извлекаем индекс выбранного школьника
-    selected_idx = int(query.data.split('_')[2])
-
-    # Получаем список совпадений из context
-    matched_students = context.user_data.get('matched_students')
-    if not matched_students:
-        query.edit_message_text("❌ Ошибка: данные школьников не найдены.")
-        return ConversationHandler.END
-
-    # Сохраняем выбранного школьника в context
-    selected_student = matched_students[selected_idx]
-    context.user_data['selected_student'] = selected_student
-
-    # Уведомляем пользователя о выборе
-    query.edit_message_text(
-        f"✅ Наряд получит:\n\n"
-        f"{selected_student['фамилия']} {selected_student['имя']} ({selected_student['команда']})\n"
-    )
-
-    # Отправляем отдельное сообщение с запросом на ввод текста наряда
-    context.bot.send_message(
-        chat_id=query.message.chat_id,
-        text="Укажите причину наряда:"
-    )
-
-    return INPUT_DUTY_TEXT
