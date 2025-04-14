@@ -1,3 +1,6 @@
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
 # Функция обработки команды /start. Отправляем приветственное сообщение и показываем главное меню.
 def start(update: Update, context: CallbackContext) -> int:
     # Сбрасываем все данные пользователя
