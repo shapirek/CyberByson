@@ -1,3 +1,7 @@
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
+
 def handle_student_choice(update: Update, context: CallbackContext) -> int:
     """
     Обрабатывает выбор школьника из списка.
