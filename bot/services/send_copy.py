@@ -5,6 +5,9 @@ from typing import Optional
 from your_config import CHANNEL_LINK_PART  # Импорт констант из конфига
 from your_utils import generate_tags  # Импорт утилиты для генерации тегов
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 async def send_copy_to_sender(update: Update, context: CallbackContext, message_text: str) -> None:
     """
