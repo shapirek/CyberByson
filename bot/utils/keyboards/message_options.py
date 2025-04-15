@@ -1,3 +1,10 @@
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext
+
+from bot.config import CHOOSE_RECIPIENT
+from bot.common import users_data
+
+
 async def show_message_options(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     await query.answer()
