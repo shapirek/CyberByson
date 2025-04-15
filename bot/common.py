@@ -1,4 +1,7 @@
 import logging
+from bot.services.google_sheets.read_1 import read_google_sheet
+from bot.services.google_sheets.read_2 import read_google_sheet_sheet2
+from bot.services.google_sheets.read_schedule import read_schedule_sheet
 
 
 # Настройка логгера
@@ -31,4 +34,4 @@ kids_data = await read_google_sheet_sheet2(TABULA_kids)
 users_data = await read_google_sheet(TABULA)
 parents_data = await read_google_sheet_sheet2(TABULA_kids)
 staff_data = await read_google_sheet(TABULA)
-
+schedule_data = await read_schedule_sheet(SCHEDULE_SHEET_URL)
