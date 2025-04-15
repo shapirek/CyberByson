@@ -1,3 +1,9 @@
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext
+
+from bot.config import DIRECTOR_ACTION
+
+
 async def show_director_menu(update: Update, context: CallbackContext) -> int:
     # Проверяем, есть ли сообщение в update
     if update.message:
