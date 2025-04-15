@@ -1,3 +1,23 @@
+from telegram import (
+    Update,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+    ConversationHandler,
+    CallbackContext
+)
+
+from bot.config import CHOOSE_TEAM
+
+
 async def show_team_leaders_menu(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     await query.answer()
