@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+from bot.common import get_current_date, logger
+
+
 def format_schedule_message(schedule_data: dict, all_schedules: list) -> str:
     def safe_text(text: str) -> str:
         """Убираем все спецсимволы которые могут вызвать проблемы"""
