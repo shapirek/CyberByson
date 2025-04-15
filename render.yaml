@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: @cyber_bison_bot
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python3 bot.py"
+    plan: free
