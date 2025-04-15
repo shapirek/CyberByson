@@ -1,3 +1,7 @@
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext
+
+
 async def show_main_menu(update: Update, context: CallbackContext) -> None:
     keyboard = [
         ['Школьники', 'Сотрудники'],
