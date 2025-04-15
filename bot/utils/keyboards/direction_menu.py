@@ -1,3 +1,9 @@
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext
+
+from bot.config import CHOOSE_DIRECTION
+
+
 async def show_directions_menu(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     query.answer()
