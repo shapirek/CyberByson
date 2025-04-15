@@ -1,3 +1,23 @@
+from telegram import (
+    Update,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+    ConversationHandler,
+    CallbackContext
+)
+
+from bot.config import STAFF_ACTION
+
+
 async def show_staff_menu(update: Update, context: CallbackContext) -> int:
     # Проверяем, есть ли сообщение в update
     if update.message:
