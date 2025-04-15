@@ -6,7 +6,7 @@ from bot.config import CHOOSE_DIRECTION
 
 async def show_directions_menu(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     keyboard = [
         [InlineKeyboardButton("НТН", callback_data='НТН')],
