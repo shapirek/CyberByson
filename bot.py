@@ -1,3 +1,45 @@
+import csv
+from io import StringIO
+from telegram import (
+    Update,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+    ConversationHandler,
+    CallbackContext
+)
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import requests
+import chardet
+import time
+import logging
+from datetime import datetime, timedelta
+from telegram.utils.helpers import escape_markdown
+
+import yake
+import uuid
+from fuzzywuzzy import process
+
+import pytz
+
+import logging
+
+# Настройка логгера
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
 CODE_INPUT = 0
 DIRECTOR_ACTION = 1
 STAFF_ACTION = 2
