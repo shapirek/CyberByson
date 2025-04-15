@@ -1,3 +1,7 @@
+from typing import Any
+from .tags import generate_tags
+
+
 def format_message_with_signature(message_text: str, sender_name: str, sender_surname: str, sender_status: str, recipient_type: str = None, **kwargs) -> str:
     """
     Формирует сообщение с подписью и тегами, без экранирования Markdown-разметки.
