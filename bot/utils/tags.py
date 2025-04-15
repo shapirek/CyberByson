@@ -1,3 +1,7 @@
+import uuid
+import yake
+
+
 def generate_unique_id() -> str:
     """
     Генерирует уникальный идентификатор для каждого сообщения.
