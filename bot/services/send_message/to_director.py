@@ -1,34 +1,52 @@
-def send_message_to_director(update: Update, context: CallbackContext) -> int:
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
+import logging
+logger = logging.getLogger(__name__)
+
+from your_data_module import users_data  # или как у тебя называется
+
+import asyncio
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
+
+async def send_message_to_director(update: Update, context: CallbackContext) -> int:
     message_text = context.user_data.get('message_text')
     sender = next((u for u in users_data if str(u['код']) == context.user_data.get('code')), None)
 
     if not sender:
         if update.callback_query:
-            update.callback_query.edit_message_text("❌ Ошибка: отправитель не найден!")
+            await update.callback_query.edit_message_text("❌ Ошибка: отправитель не найден!")
         else:
-            update.message.reply_text("❌ Ошибка: отправитель не найден!")
+            await update.message.reply_text("❌ Ошибка: отправитель не найден!")
         return ConversationHandler.END
 
-    # Получаем список ID дирекции (статус '0'), исключая отправителя
     receivers = [user['id'] for user in users_data
                  if user.get('статус') == '0' and user.get('id') and user['id'] != sender['id']]
 
     if not receivers:
         if update.callback_query:
-            update.callback_query.edit_message_text("❌ Нет сотрудников в дирекции!")
+            await update.callback_query.edit_message_text("❌ Нет сотрудников в дирекции!")
         else:
-            update.message.reply_text("❌ Нет сотрудников в дирекции!")
+            await update.message.reply_text("❌ Нет сотрудников в дирекции!")
     else:
-        for user_id in receivers:
+        async def send(uid):
             try:
-                send_message_with_signature(
-                    context, user_id, message_text, sender['имя'], sender['фамилия'], sender['статус'], recipient_type='director'
+                await send_message_with_signature(
+                    context, uid, message_text,
+                    sender['имя'], sender['фамилия'], sender['статус'],
+                    recipient_type='director'
                 )
             except Exception as e:
-                print(f"Ошибка отправки сообщения {user_id}: {e}")
+                logger.warning(f"Ошибка отправки сообщения {uid}: {e}")
 
-        # Отправляем подтверждение об успешной отправке
+        # Распараллеливаем отправку сообщений
+        await asyncio.gather(*(send(uid) for uid in receivers))
+
         if update.callback_query:
-            update.callback_query.edit_message_text("✅ Сообщения отправлены!")
+            await update.callback_query.edit_message_text("✅ Сообщения отправлены!")
         else:
-            update.message.reply_text("✅ Сообщения отправлены!")
+            await update.message.reply_text("✅ Сообщения отправлены!")
+
+    return ConversationHandler.END
