@@ -61,13 +61,11 @@ def run_server():
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
 
-if name == "__main__":
-    # Запускаем сервер в отдельном потоке
-    server_thread = threading.Thread(target=run_server)
-    server_thread.daemon = True
-    server_thread.start()
+if __name__ == "__main__":
+    # Запускаем Flask в отдельном потоке
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
 
-    # Запускаем основной код бота
-    print("Бот запущен!")
-    while True:
-        main()
+    # Запускаем Telegram бота в основном потоке
+    asyncio.run(main())
