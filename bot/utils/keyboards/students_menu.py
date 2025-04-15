@@ -1,3 +1,23 @@
+from telegram import (
+    Update,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+    ConversationHandler,
+    CallbackContext
+)
+
+from bot.config import STUDENTS_ACTION
+
+
 async def show_students_menu(update: Update, context: CallbackContext) -> int:
     keyboard = [
         [InlineKeyboardButton("Что такое КЛШ?", callback_data='student_info')],
