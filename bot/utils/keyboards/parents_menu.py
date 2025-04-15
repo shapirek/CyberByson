@@ -1,3 +1,10 @@
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext, ConversationHandler
+
+from bot.config import PARENTS_ACTION
+from .env import TABULA_kids
+
+
 async def show_parents_menu(update: Update, context: CallbackContext) -> int:
     # Загружаем данные из таблицы школьников (TABULA_kids)
     try:
