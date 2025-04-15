@@ -5,7 +5,7 @@ import asyncio  # Для асинхронной версии
 import logging  # Для логирования
 
 
-async def send_message_with_signature_async(
+async def send_message_with_signature(
     context: CallbackContext,
     chat_id: str,
     message_text: str,
