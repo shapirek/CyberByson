@@ -1,30 +1,40 @@
-def send_message_to_tournament_judges(update: Update, context: CallbackContext) -> int:
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
+import logging
+logger = logging.getLogger(__name__)
+
+import asyncio
+
+
+async def send_message_to_tournament_judges(update: Update, context: CallbackContext) -> int:
     message_text = context.user_data.get('message_text')
     tournament = context.user_data.get('selected_tournament')
     sender = next((u for u in users_data if str(u['код']) == context.user_data.get('code')), None)
 
     if not sender:
         if update.callback_query:
-            update.callback_query.edit_message_text("❌ Ошибка: отправитель не найден!")
+            await update.callback_query.edit_message_text("❌ Ошибка: отправитель не найден!")
         else:
-            update.message.reply_text("❌ Ошибка: отправитель не найден!")
+            await update.message.reply_text("❌ Ошибка: отправитель не найден!")
         return ConversationHandler.END
 
-    # Определяем направления для выбранного турнира
-    if tournament == 'ФМТ':
-        directions = ['НТН']
-    elif tournament == 'ГУТ':
-        directions = ['НФН', 'НОН']
-    elif tournament == 'БХТ':
-        directions = ['НЕН']
-    else:
+    # Определяем направления
+    directions_by_tournament = {
+        'ФМТ': ['НТН'],
+        'ГУТ': ['НФН', 'НОН'],
+        'БХТ': ['НЕН']
+    }
+    directions = directions_by_tournament.get(tournament)
+
+    if not directions:
         if update.callback_query:
-            update.callback_query.edit_message_text("❌ Неизвестный турнир!")
+            await update.callback_query.edit_message_text("❌ Неизвестный турнир!")
         else:
-            update.message.reply_text("❌ Неизвестный турнир!")
+            await update.message.reply_text("❌ Неизвестный турнир!")
         return ConversationHandler.END
 
-    # Получаем список ID судей для выбранного турнира, исключая отправителя
+    # Получаем судей
     receivers = [
         user['id'] for user in users_data
         if user.get('судья') == '1' and user.get('направление') in directions
@@ -32,21 +42,29 @@ def send_message_to_tournament_judges(update: Update, context: CallbackContext) 
     ]
 
     if not receivers:
+        msg = f"❌ Нет судей для {tournament}!"
         if update.callback_query:
-            update.callback_query.edit_message_text(f"❌ Нет судей для {tournament}!")
+            await update.callback_query.edit_message_text(msg)
         else:
-            update.message.reply_text(f"❌ Нет судей для {tournament}!")
+            await update.message.reply_text(msg)
     else:
-        for user_id in receivers:
+        async def send(uid):
             try:
-                send_message_with_signature(
-                    context, user_id, message_text, sender['имя'], sender['фамилия'], sender['статус'], recipient_type='tournament_judges', tournament=tournament
+                await send_message_with_signature(
+                    context, uid, message_text,
+                    sender['имя'], sender['фамилия'], sender['статус'],
+                    recipient_type='tournament_judges',
+                    tournament=tournament
                 )
             except Exception as e:
-                print(f"Ошибка отправки сообщения {user_id}: {e}")
+                logger.warning(f"Ошибка отправки сообщения {uid}: {e}")
 
-        # Отправляем подтверждение об успешной отправке
+        await asyncio.gather(*(send(uid) for uid in receivers))
+
+        confirm = "✅ Сообщения отправлены!"
         if update.callback_query:
-            update.callback_query.edit_message_text("✅ Сообщения отправлены!")
+            await update.callback_query.edit_message_text(confirm)
         else:
-            update.message.reply_text("✅ Сообщения отправлены!")
+            await update.message.reply_text(confirm)
+
+    return ConversationHandler.END
