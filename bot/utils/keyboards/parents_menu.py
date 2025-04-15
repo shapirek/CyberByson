@@ -1,5 +1,19 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext, ConversationHandler
+from telegram import (
+    Update,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+    ConversationHandler,
+    CallbackContext
+)
 
 from bot.config import PARENTS_ACTION
 from .env import TABULA_kids
