@@ -29,6 +29,10 @@ import yake
 import uuid
 from fuzzywuzzy import process
 
+import os
+import threading
+from flask import Flask
+
 import pytz
 
 import logging
@@ -1907,5 +1911,24 @@ def main() -> None:
     updater.start_polling()
     updater.idle()
 
-if __name__ == '__main__':
-    main()
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "Сервис работает", 200
+
+def run_server():
+    port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения, по умолчанию 5000
+    # Указываем прослушивание на всех интерфейсах (0.0.0.0)
+    app.run(host="0.0.0.0", port=port)
+
+if __name__ == "__main__":
+    # Запускаем сервер в отдельном потоке, чтобы не блокировать основной процесс бота
+    server_thread = threading.Thread(target=run_server)
+    server_thread.daemon = True  # Делает поток демоном, чтобы он завершался вместе с основным процессом
+    server_thread.start()
+
+    # Здесь запускается ваш основной код бота
+    print("Бот запущен!")
+    while True:
+        main()
