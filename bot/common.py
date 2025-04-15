@@ -1,5 +1,6 @@
 import logging
 
+
 # Настройка логгера
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -25,3 +26,9 @@ def normalize_table_date(date_str: str) -> str:
         return f"{day}.{month:02d}"
     except:
         return date_str  # если не удалось разобрать, оставляем как есть
+
+kids_data = await read_google_sheet_sheet2(TABULA_kids)
+users_data = await read_google_sheet(TABULA)
+parents_data = await read_google_sheet_sheet2(TABULA_kids)
+staff_data = await read_google_sheet(TABULA)
+
