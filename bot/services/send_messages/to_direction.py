@@ -5,7 +5,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from bot.common import load_users_data_async
 from bot.services.filters import get_receivers_async
-from bot.services.send_messages.send_message_with_signature import send_message_with_signature
+from bot.services.send_messages.signatures import send_message_with_signature
 
 logger = logging.getLogger(__name__)
 
