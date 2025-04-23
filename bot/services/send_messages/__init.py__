@@ -2,5 +2,11 @@ from .channel import *
 from .filters import *
 from .plea import *
 from .senders import *
+from .signatures import *
+from .to_all_staff import *
+from .to_direction import *
+from .to_director import *
+from .to_team import *
+from .to_tournament_judges import *
 
 __all__ = ["read_1", "read_2", "read_schedule"]
