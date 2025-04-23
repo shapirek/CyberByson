@@ -1,24 +1,18 @@
 from telegram import (
     Update,
-    ReplyKeyboardMarkup,
     InlineKeyboardMarkup,
-    InlineKeyboardButton
+    InlineKeyboardButton,
 )
 
 from telegram.ext import (
-    Updater,
-    CommandHandler,
-    MessageHandler,
     CallbackQueryHandler,
-    Filters,
-    ConversationHandler,
-    CallbackContext
+    ContextTypes,
 )
 
 from bot.config import CHOOSE_TEAM
 
 
-async def show_team_leaders_menu(update: Update, context: CallbackContext) -> int:
+async def show_team_leaders_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
 
@@ -37,4 +31,5 @@ async def show_team_leaders_menu(update: Update, context: CallbackContext) -> in
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="Выберите команду:", reply_markup=reply_markup)
+
     return CHOOSE_TEAM
