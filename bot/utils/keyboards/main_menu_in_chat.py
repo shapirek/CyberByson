@@ -1,22 +1,8 @@
-from telegram import (
-    Update,
-    ReplyKeyboardMarkup,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton
-)
-
-from telegram.ext import (
-    Updater,
-    CommandHandler,
-    MessageHandler,
-    CallbackQueryHandler,
-    Filters,
-    ConversationHandler,
-    CallbackContext
-)
+from telegram import ReplyKeyboardMarkup
+from telegram.ext import ContextTypes
 
 
-async def show_main_menu_in_chat(context: CallbackContext, chat_id: int) -> None:
+async def show_main_menu_in_chat(context: ContextTypes.DEFAULT_TYPE, chat_id: int) -> None:
     keyboard = [
         ['Школьники', 'Сотрудники'],
         ['Родители'],
