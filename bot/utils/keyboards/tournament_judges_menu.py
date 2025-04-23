@@ -1,24 +1,18 @@
 from telegram import (
     Update,
-    ReplyKeyboardMarkup,
     InlineKeyboardMarkup,
-    InlineKeyboardButton
+    InlineKeyboardButton,
 )
 
 from telegram.ext import (
-    Updater,
-    CommandHandler,
-    MessageHandler,
     CallbackQueryHandler,
-    Filters,
-    ConversationHandler,
-    CallbackContext
+    ContextTypes,
 )
 
 from bot.config import CHOOSE_TOURNAMENT
 
 
-async def show_tournament_judges_menu(update: Update, context: CallbackContext) -> int:
+async def show_tournament_judges_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
 
@@ -33,4 +27,5 @@ async def show_tournament_judges_menu(update: Update, context: CallbackContext) 
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="Выберите турнир:", reply_markup=reply_markup)
+
     return CHOOSE_TOURNAMENT
