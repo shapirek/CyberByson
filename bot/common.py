@@ -12,20 +12,6 @@ from .env import CHANNEL_LINK_PART
 from .env import GROUP_ID
 from .env import TIMEZONE
 
-
-# Настройка логгера
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
-
-kids_data = await read_google_sheet_sheet2(TABULA_kids)
-users_data = await read_google_sheet(TABULA)
-parents_data = await read_google_sheet_sheet2(TABULA_kids)
-staff_data = await read_google_sheet(TABULA)
-schedule_data = await read_schedule_sheet(SCHEDULE_SHEET_URL)
-
 # bot/common.py
 import aiohttp
 import csv
@@ -35,10 +21,15 @@ from typing import List, Dict
 import logging
 from functools import lru_cache
 
-logger = logging.getLogger(__name__)
-
 REQUEST_TIMEOUT = 10  # секунд
 CACHE_TTL = 300  # 5 минут
+
+# Настройка логгера
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 async def load_users_data_async() -> List[Dict[str, str]]:
     """
