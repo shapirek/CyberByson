@@ -1,24 +1,10 @@
-from telegram import (
-    Update,
-    ReplyKeyboardMarkup,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton
-)
-
-from telegram.ext import (
-    Updater,
-    CommandHandler,
-    MessageHandler,
-    CallbackQueryHandler,
-    Filters,
-    ConversationHandler,
-    CallbackContext
-)
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import ContextTypes
 
 from bot.config import DIRECTOR_ACTION
 
 
-async def show_director_menu(update: Update, context: CallbackContext) -> int:
+async def show_director_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # Проверяем, есть ли сообщение в update
     if update.message:
         chat_id = update.message.chat_id
@@ -35,6 +21,5 @@ async def show_director_menu(update: Update, context: CallbackContext) -> int:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Отправляем сообщение с клавиатурой
     await context.bot.send_message(chat_id=chat_id, text="Меню дирекции:", reply_markup=reply_markup)
     return DIRECTOR_ACTION
