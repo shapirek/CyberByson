@@ -1,24 +1,23 @@
 from telegram import (
-    Update,
     ReplyKeyboardMarkup,
     InlineKeyboardMarkup,
     InlineKeyboardButton
 )
 
 from telegram.ext import (
-    Updater,
+    Application,
     CommandHandler,
     MessageHandler,
     CallbackQueryHandler,
-    Filters,
+    filters,
     ConversationHandler,
-    CallbackContext
+    ContextTypes
 )
 
 from bot.config import CHOOSE_DIRECTION
 
 
-async def show_directions_menu(update: Update, context: CallbackContext) -> int:
+async def show_directions_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
 
