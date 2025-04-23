@@ -1,4 +1,3 @@
-import logging
 from bot.services.google_sheets.read_1 import read_google_sheet
 from bot.services.google_sheets.read_2 import read_google_sheet_sheet2
 from bot.services.google_sheets.read_schedule import read_schedule_sheet
