@@ -8,5 +8,6 @@ from .to_direction import *
 from .to_director import *
 from .to_team import *
 from .to_tournament_judges import *
+from .copy_helpers import *
 
-__all__ = ["read_1", "read_2", "read_schedule"]
+__all__ = ["channel", "filters", "plea", "senders", "signatures", "to_all_staff", "to_direction", "to_director", "to_team", "to_tournament_judges", "copy_helpers"]
