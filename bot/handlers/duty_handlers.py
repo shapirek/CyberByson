@@ -4,7 +4,7 @@ from typing import List, Dict
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 
-from .env import TABULA, TABULA_kids
+from bot.env import TABULA, TABULA_kids
 from bot.config import (
     INPUT_STUDENT_INFO,
     CHOOSE_STUDENT,
