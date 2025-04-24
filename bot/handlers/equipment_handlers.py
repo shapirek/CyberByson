@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from bot.common import load_users_data_async
 from bot.config import REQUEST_EQUIPMENT
-from .env import CHANNEL_LINK_PART
+from bot.env import CHANNEL_LINK_PART
 from bot.services.send_messages.plea import send_plea_to_channel_async
 from bot.services.formatters import format_message_with_signature_async
 from bot.utils.keyboards.staff_menu import show_staff_menu
