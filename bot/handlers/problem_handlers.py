@@ -4,7 +4,7 @@ import logging
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from .env import CHANNEL_ID, GROUP_ID
+from bot.env import CHANNEL_ID, GROUP_ID
 from bot.common import load_users_data_async
 
 logger = logging.getLogger(__name__)
