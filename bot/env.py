@@ -3,7 +3,7 @@ import os
 
 load_dotenv()  # подгрузит .env в окружение
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("TOKEN")
 TABULA = os.getenv("TABULA")
 TABULA_kids = os.getenv("TABULA_KIDS")
 SCHEDULE_SHEET_URL = os.getenv("SCHEDULE_SHEET_URL")
