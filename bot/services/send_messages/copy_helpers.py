@@ -5,7 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from bot.common import load_users_data_async
-from .env import CHANNEL_LINK_PART
+from bot.env import CHANNEL_LINK_PART
 from bot.services.formatters import generate_tags
 
 logger = logging.getLogger(__name__)
