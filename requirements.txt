@@ -11,3 +11,4 @@ aiohttp>=3.8.0
 flask
 fastapi
 uvicorn
+python levenshtein
