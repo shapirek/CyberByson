@@ -1,5 +1,8 @@
+import logging
 from datetime import datetime, timedelta
-from bot.common import get_current_date, logger
+from bot.services.dates import get_current_date
+
+logger = logging.getLogger(__name__)
 
 
 def format_schedule_message(schedule_data: dict, all_schedules: list) -> str:
