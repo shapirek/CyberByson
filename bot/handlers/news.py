@@ -9,7 +9,7 @@ from telegram.ext import ContextTypes
 from bot.services.google_sheets.read_schedule import read_schedule_sheet
 from bot.services.dates import get_current_date, normalize_table_date
 from bot.utils.schedule import format_schedule_message
-from .env import SCHEDULE_SHEET_URL
+from bot.env import SCHEDULE_SHEET_URL
 
 logger = logging.getLogger(__name__)
 
