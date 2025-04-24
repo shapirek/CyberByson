@@ -2,14 +2,14 @@ from bot.services.google_sheets.read_1 import read_google_sheet
 from bot.services.google_sheets.read_2 import read_google_sheet_sheet2
 from bot.services.google_sheets.read_schedule import read_schedule_sheet
 
-from .env import TOKEN
-from .env import TABULA
-from .env import TABULA_kids
-from .env import SCHEDULE_SHEET_URL
-from .env import CHANNEL_ID
-from .env import CHANNEL_LINK_PART
-from .env import GROUP_ID
-from .env import TIMEZONE
+from bot.env import TOKEN
+from bot.env import TABULA
+from bot.env import TABULA_kids
+from bot.env import SCHEDULE_SHEET_URL
+from bot.env import CHANNEL_ID
+from bot.env import CHANNEL_LINK_PART
+from bot.env import GROUP_ID
+from bot.env import TIMEZONE
 
 # bot/common.py
 import aiohttp
