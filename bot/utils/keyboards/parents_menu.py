@@ -3,7 +3,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from bot.config import PARENTS_ACTION
 from bot.services.google_sheets.read_2 import read_google_sheet_sheet2
-from .env import TABULA_kids
+from bot.env import TABULA_kids
 
 import logging
 
