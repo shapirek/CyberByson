@@ -2,7 +2,7 @@ import logging
 from typing import Optional, Dict
 
 from telegram.ext import ContextTypes
-from telegram import ParseMode
+from telegram.constants import ParseMode
 
 from bot.env import CHANNEL_ID
 from bot.services.formatters import (
