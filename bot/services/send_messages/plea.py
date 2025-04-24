@@ -4,7 +4,7 @@ from typing import Optional, Dict
 from telegram.ext import ContextTypes
 from telegram import ParseMode
 
-from .env import CHANNEL_ID
+from bot.env import CHANNEL_ID
 from bot.services.formatters import (
     format_message_with_signature_async,
     generate_unique_id,
