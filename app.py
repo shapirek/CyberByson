@@ -13,6 +13,7 @@ from telegram.ext import (
     filters
 )
 
+from bot.handlers.start_handlers      import handle_start
 from bot.handlers.auth_handlers       import handle_code_input
 from bot.handlers.category_handlers   import handle_category
 from bot.handlers.inline_handlers     import inline_button_handler
@@ -93,7 +94,7 @@ async def start_bot():
     )
 
     # 2) Регистрируем основные хендлеры
-    application.add_handler(CommandHandler("start", handle_category))
+    application.add_handler(CommandHandler("start", handle_start))
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_category)
     )
