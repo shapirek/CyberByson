@@ -82,18 +82,24 @@ async def on_startup():
 
 async def start_bot():
     """
-    Конфигурируем и запускаем polling Telegram-бота.
+    Конфигурируем и запускаем polling Telegram-бота
+    без закрытия основного asyncio-цикла.
     """
-    application = ApplicationBuilder().token(TOKEN).build()  # PTB v20+ :contentReference[oaicite:1]{index=1}
+    # 1) Создаём экземпляр Application
+    application = (
+        ApplicationBuilder()
+        .token(TOKEN)
+        .build()
+    )
 
-    # Основные хендлеры
+    # 2) Регистрируем основные хендлеры
     application.add_handler(CommandHandler("start", handle_category))
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_category)
     )
     application.add_handler(CallbackQueryHandler(inline_button_handler))
 
-    # ConversationHandler для состояний диалога :contentReference[oaicite:2]{index=2}
+    # 3) ConversationHandler для состояний диалога
     conv = ConversationHandler(
         entry_points=[
             CommandHandler("start", handle_category),
@@ -127,16 +133,12 @@ async def start_bot():
     )
     application.add_handler(conv)
 
-    # Дополнительные CallbackQueryHandler-ы
+    # 4) Дополнительные CallbackQueryHandler-ы
     application.add_handler(CallbackQueryHandler(handle_news, pattern="^news$"))
     application.add_handler(CallbackQueryHandler(handle_problem_solved_button, pattern="^problem_solved_"))
 
-    # Запускаем polling (не блокирует HTTP благодаря create_task) :contentReference[oaicite:3]{index=3}
-    await application.run_polling()
+    # 5) Инициализируем и запускаем polling без закрытия event loop
+    await application.initialize()
+    await application.start()
 
-# ===================================================================
-# Запуск через Uvicorn:
-#    uvicorn app:app --host 0.0.0.0 --port $PORT
-# Теперь Uvicorn загрузит FastAPI и автоматически вызовет on_startup,
-# что гарантирует запуск Telegram-бота при каждом деплое. :contentReference[oaicite:4]{index=4}
-# ===================================================================
+    logger.info("Telegram bot started polling in background.")
