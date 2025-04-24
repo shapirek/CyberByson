@@ -1,5 +1,3 @@
-# bot/handlers/news.py
-
 import logging
 import asyncio
 
