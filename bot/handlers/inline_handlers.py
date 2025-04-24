@@ -19,12 +19,12 @@ from bot.handlers.recipient_handlers import handle_recipient_choice
 from bot.utils.keyboards.main_menu import show_main_menu_in_chat
 from bot.common import load_users_data_async
 from bot.config import (
-    CHANNEL_ID, GROUP_ID,
     INPUT_MESSAGE, INPUT_STUDENT_INFO, INPUT_DUTY_TEXT,
     INPUT_CHILD_NAME, INPUT_MESSAGE_FOR_CHILD,
     CODE_INPUT, WAIT_FOR_RESPONSE,
     PARENTS_ACTION, STUDENTS_ACTION, STAFF_ACTION, DIRECTOR_ACTION,
 )
+from bot.env import CHANNEL_ID, GROUP_ID
 
 logger = logging.getLogger(__name__)
 
