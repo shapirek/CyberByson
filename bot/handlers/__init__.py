@@ -13,5 +13,6 @@ from .recipient_handlers import *
 from .response_handlers import *
 from .team_handlers import *
 from .tournament_handlers import *
+from .start_handlers import *
 
-__all__ = ["auth_handlers", "category_handlers", "direction_handlers", "duty_handlers", "equipment_handlers", "inline_handlers", "menu_handlers", "message_handlers", "news", "parent_handlers", "problem_handlers", "recipient_handlers", "response_handlers", "team_handlers", "tournament_handlers"]
+__all__ = ["auth_handlers", "start_handlers", "category_handlers", "direction_handlers", "duty_handlers", "equipment_handlers", "inline_handlers", "menu_handlers", "message_handlers", "news", "parent_handlers", "problem_handlers", "recipient_handlers", "response_handlers", "team_handlers", "tournament_handlers"]
