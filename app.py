@@ -91,7 +91,7 @@ async def start_bot():
 
     await application.run_polling()
 
-if name == "__main__":
+if __name__ == "__main__":
     threading.Thread(target=lambda: asyncio.run(start_bot()), daemon=True).start()
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
