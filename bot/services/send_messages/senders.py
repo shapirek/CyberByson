@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 
 from bot.common import load_users_data_async
-from .env import CHANNEL_LINK_PART
+from bot.env import CHANNEL_LINK_PART
 from bot.config import PARENTS_ACTION, DIRECTOR_ACTION, STAFF_ACTION, STUDENTS_ACTION, CHOOSE_RECIPIENT
 from bot.services.send_messages.channel import send_message_to_channel
 from bot.services.send_messages.copy_helpers import send_copy_to_sender
