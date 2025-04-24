@@ -4,7 +4,7 @@ from typing import List, Dict
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 
-from .env import TABULA_kids
+from .env import TABULA, TABULA_kids
 from bot.config import (
     INPUT_STUDENT_INFO,
     CHOOSE_STUDENT,
@@ -12,6 +12,7 @@ from bot.config import (
 )
 from bot.services.google_sheets.read_2 import read_google_sheet_sheet2
 from bot.common import load_users_data_async
+from bot.utils.keyboards.staff_menu import show_staff_menu
 from fuzzywuzzy import process
 
 logger = logging.getLogger(__name__)
@@ -128,3 +129,63 @@ async def handle_student_choice(
         text="Укажите причину наряда:"
     )
     return INPUT_DUTY_TEXT
+
+async def handle_duty_text_input(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """
+    Принимает текст наряда, находит сотрудников ПСИН и рассылает им сообщение.
+    Затем возвращает пользователя в меню сотрудников.
+    """
+    duty_text = update.message.text.strip()
+
+    # 1) Загрузим и закешируем users_data
+    if 'users_data' not in context.bot_data:
+        context.bot_data['users_data'] = await load_users_data_async()
+    users = context.bot_data['users_data']
+
+    # 2) Найдём отправителя по коду
+    sender_code = str(context.user_data.get('code', ''))
+    sender = next((u for u in users if str(u.get('код')) == sender_code), None)
+    if not sender:
+        await update.message.reply_text("❌ Ошибка: отправитель не найден!")
+        return ConversationHandler.END
+
+    # 3) Получим выбранного школьника
+    selected = context.user_data.get('selected_student')
+    if not selected:
+        await update.message.reply_text("❌ Ошибка: данные школьника не найдены.")
+        return ConversationHandler.END
+
+    # 4) Соберём текст наряда
+    message_text = (
+        "🚨 НАРЯД 🚨\n\n"
+        f"КОМУ: {selected['имя']} {selected['фамилия']} ({selected['команда']})\n"
+        f"ОТ КОГО: {sender['имя']} {sender['фамилия']} ({sender.get('команда','')})\n\n"
+        "━━━━━━━━━━━━━━━━━━\n"
+        f"{duty_text}"
+    )
+
+    # 5) Фильтруем сотрудников ПСИН (псин == '1')
+    recipients = [u for u in users if u.get('псин') == '1']
+    if not recipients:
+        await update.message.reply_text("❌ Нет назначенных сотрудников ПСИН.")
+        return ConversationHandler.END
+
+    # 6) Асинхронно рассылаем всем ПСИН пакетно (по 30/сек)
+    import asyncio
+    tasks = [
+        context.bot.send_message(chat_id=int(u['id']), text=message_text)
+        for u in recipients
+    ]
+    for i in range(0, len(tasks), 30):
+        await asyncio.gather(*tasks[i:i+30])
+        if i + 30 < len(tasks):
+            await asyncio.sleep(1)
+
+    # 7) Уведомляем отправителя
+    await update.message.reply_text("✅ Запрос отправлен всем сотрудникам ПСИН!")
+
+    # 8) Возвращаем в меню сотрудников
+    return await show_staff_menu(update, context)
