@@ -103,7 +103,7 @@ async def start_bot():
     # 3) ConversationHandler для состояний диалога
     conv = ConversationHandler(
         entry_points=[
-            CommandHandler("start", handle_category),
+            CommandHandler("start", handle_start),
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_category),
             CallbackQueryHandler(inline_button_handler),
         ],
