@@ -1,4 +1,4 @@
-python-telegram-bot==13.15
+python-telegram-bot>=20.0
 chardet==4.0.0
 yake==0.4.8
 fuzzywuzzy==0.18.0
