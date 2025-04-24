@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from telegram.ext import ContextTypes
-from telegram import ParseMode
+from telegram.constants import ParseMode
 
 from bot.services.formatters import format_message_with_signature_async
 
