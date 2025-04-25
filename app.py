@@ -139,6 +139,8 @@ async def start_bot():
     application.add_handler(CallbackQueryHandler(handle_problem_solved_button, pattern="^problem_solved_"))
 
     # 5) Инициализируем и запускаем polling без закрытия event loop
+    await application.initialize()
+    await application.start()
     await application.run_polling()
 
     logger.info("Telegram bot started polling in background.")
