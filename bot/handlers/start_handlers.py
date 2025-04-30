@@ -2,6 +2,8 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from bot.utils.keyboards.main_menu import show_main_menu
 
+logger = logging.getLogger(__name__)
+
 async def handle_start(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
