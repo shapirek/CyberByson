@@ -1,13 +1,9 @@
 def read_google_sheet_sheet2(sheet_url):
     """
-    Загружает данные из второй таблицы (таблица школьников) Google Sheets.
+    Загружает данные из второй вкладки (Лист2) таблицы Google Sheets.
     """
-    if not sheet_url:
-        raise Exception("TABULA_kids не задана — проверьте env-переменную")
-    csv_url = sheet_url.replace('/edit', '/export?format=csv') 
-
-    # Загружаем данные
-    response = requests.get(csv_url)
+    # Заменяем часть URL для экспорта в CSV и указываем gid второй вкладки
+    csv_url = sheet_url.replace('/edit', '/export?format=csv&gid=GID_kids')
 
     # Загружаем данные
     response = requests.get(csv_url)
