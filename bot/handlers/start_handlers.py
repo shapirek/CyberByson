@@ -12,6 +12,7 @@ async def handle_start(
     Возвращаем ConversationHandler.END, чтобы диалог был «готов»
     к дальнейшим кнопкам.
     """
+    logger.info(f"handle_start вызван для {update.effective_user.id}")
     context.user_data.clear()
     await update.message.reply_text("Приветствуем, кожаный мешок!")
     await show_main_menu(update, context)
