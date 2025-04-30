@@ -82,13 +82,15 @@ async def _fetch_raw_data() -> str:
 
 def get_cached_users_data() -> List[Dict]:
     """Получение кэшированных данных с проверкой TTL"""
-    if not hasattr(_parse_and_cache, 'cache_info'):
+    if not hasattr(_parse_and_cache, 'cache'):
         return None
-        
-    cache_info = _parse_and_cache.cache_info()
-    if cache_info.hits > 0 and cache_info.ttl > 0:
-        return _parse_and_cache.cache_info()._CacheInfo__cache[list(_parse_and_cache.cache_info()._CacheInfo__cache.keys())[0]]
-    return None
+
+    cache = getattr(_parse_and_cache, 'cache')
+    # Если в cache есть хотя бы один элемент — возвращаем его
+    if len(cache) > 0:
+        # берём значение первого ключа
+        return next(iter(cache.values()))
+   return None
 
 def get_fallback_data() -> List[Dict]:
     """Резервные данные на случай ошибок"""
