@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.info(f"Пользователь запустил /start: {update.effective_user.id}")
     keyboard = [
         ['Школьники', 'Сотрудники'],
         ['Родители'],
