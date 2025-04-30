@@ -134,6 +134,11 @@ async def start_bot():
     )
     application.add_handler(conv)
 
+    await application.bot.set_my_commands([
+        BotCommand("start", "Запустить бота"),
+        BotCommand("help", "Получить справку")
+    ])
+
     # 4) Дополнительные CallbackQueryHandler-ы
     application.add_handler(CallbackQueryHandler(handle_news, pattern="^news$"))
     application.add_handler(CallbackQueryHandler(handle_problem_solved_button, pattern="^problem_solved_"))
