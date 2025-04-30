@@ -145,6 +145,7 @@ async def start_bot():
 
     # 5) Инициализируем и запускаем polling без закрытия event loop
     await application.initialize()
-    await application.run_polling()
+    await application.start()
+    await application.updater.start_polling()
 
     logger.info("Telegram bot started polling in background.")
