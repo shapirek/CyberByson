@@ -97,9 +97,6 @@ async def start_bot():
 
     # 2) Регистрируем основные хендлеры
     application.add_handler(CommandHandler("start", handle_start))
-    application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_category)
-    )
     application.add_handler(CallbackQueryHandler(inline_button_handler))
 
     # 3) ConversationHandler для состояний диалога
@@ -135,6 +132,9 @@ async def start_bot():
         fallbacks=[CommandHandler("start", handle_category)],
     )
     application.add_handler(conv)
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_category)
+    )
 
     await application.bot.set_my_commands([
         BotCommand("start", "Запустить бота"),
