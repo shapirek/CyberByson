@@ -1,6 +1,9 @@
+import loggin
+
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 
+logger = logging.getLogger(__name__)
 
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.info(f"Пользователь запустил /start: {update.effective_user.id}")
