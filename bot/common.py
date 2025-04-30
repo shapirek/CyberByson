@@ -82,7 +82,7 @@ async def _fetch_raw_data() -> str:
 
 def get_cached_users_data() -> List[Dict]:
     """Получение кэшированных данных с проверкой TTL"""
-    cache =  getattr(_parse_and_cache, 'cache', None):
+    cache =  getattr(_parse_and_cache, 'cache', None)
     if not cache:
         return None
     return next(iter(cache.values()))
