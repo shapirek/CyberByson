@@ -4,10 +4,10 @@ def read_google_sheet_sheet2(sheet_url):
     """
     if not sheet_url:
         raise Exception("TABULA_kids не задана — проверьте env-переменную")
-     csv_url = sheet_url.replace('/edit', '/export?format=csv') 
+    csv_url = sheet_url.replace('/edit', '/export?format=csv') 
 
-     # Загружаем данные
-     response = requests.get(csv_url)
+    # Загружаем данные
+    response = requests.get(csv_url)
 
     # Загружаем данные
     response = requests.get(csv_url)
