@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
+    BaseHandler,
     MessageHandler,
     CallbackQueryHandler,
     ConversationHandler,
@@ -149,3 +150,10 @@ async def start_bot():
     await application.updater.start_polling()
 
     logger.info("Telegram bot started polling in background.")
+
+    class DebugHandler(BaseHandler):
+        async def check_update(self, update):
+            print(f"[DEBUG] Получен update: {update}")
+            return False  # не обрабатываем, просто логируем
+    
+    application.add_handler(DebugHandler())
