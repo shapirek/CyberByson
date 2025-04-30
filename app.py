@@ -4,6 +4,7 @@ import logging
 import asyncio
 
 from fastapi import FastAPI
+from telegram import BotCommand
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
