@@ -5,7 +5,7 @@ load_dotenv()  # подгрузит .env в окружение
 
 TOKEN = os.getenv("TOKEN")
 TABULA = os.getenv("TABULA")
-TABULA_kids = os.getenv("TABULA_KIDS")
+TABULA_kids = os.getenv("TABULA_kids")
 SCHEDULE_SHEET_URL = os.getenv("SCHEDULE_SHEET_URL")
 CHANNEL_ID = os.getenv("CHANNEL_ID")
 CHANNEL_LINK_PART = os.getenv("CHANNEL_LINK_PART")
