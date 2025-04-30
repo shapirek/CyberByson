@@ -149,6 +149,7 @@ async def start_bot():
     await application.initialize()
     await application.start()
     await application.updater.start_polling()
+    application.updater.idle()
 
     logger.info("Telegram bot started polling in background.")
 
