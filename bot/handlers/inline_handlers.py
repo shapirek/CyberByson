@@ -1,30 +1,49 @@
+# bot/handlers/inline_handlers.py
+
 import logging
 from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler, CallbackQueryHandler
+from telegram.ext import ContextTypes, ConversationHandler
 
-from bot.handlers.auth_handlers      import handle_code_input
-from bot.handlers.category_handlers  import handle_category
-from bot.handlers.news               import handle_news
-from bot.handlers.menu_handlers      import director_announcement, staff_write_message
-from bot.handlers.equipment_handlers import handle_request_equipment, handle_equipment_input
-from bot.handlers.duty_handlers      import handle_assign_duty, handle_student_info_input, handle_student_choice, handle_duty_text_input
-from bot.handlers.response_handlers  import handle_wait_for_response
-from bot.handlers.problem_handlers   import handle_problem_solved_button
-from bot.handlers.parent_handlers    import handle_parent_call, handle_child_name_input, handle_child_choice, handle_message_for_child_input
-from bot.handlers.team_handlers      import handle_team_choice
-from bot.handlers.tournament_handlers import handle_tournament_choice
-from bot.handlers.direction_handlers import handle_direction_choice
-from bot.handlers.recipient_handlers import handle_recipient_choice
-
-from bot.utils.keyboards.main_menu import show_main_menu_in_chat
-from bot.common import load_users_data_async
-from bot.config import (
-    INPUT_MESSAGE, INPUT_STUDENT_INFO, INPUT_DUTY_TEXT,
-    INPUT_CHILD_NAME, INPUT_MESSAGE_FOR_CHILD,
-    CODE_INPUT, WAIT_FOR_RESPONSE,
-    PARENTS_ACTION, STUDENTS_ACTION, STAFF_ACTION, DIRECTOR_ACTION,
+from bot.handlers.auth_handlers       import handle_code_input
+from bot.handlers.category_handlers   import handle_category
+from bot.handlers.news                import handle_news
+from bot.handlers.menu_handlers       import director_announcement, staff_write_message
+from bot.handlers.equipment_handlers  import handle_request_equipment, handle_equipment_input
+from bot.handlers.duty_handlers       import (
+    handle_assign_duty,
+    handle_student_info_input,
+    handle_student_choice,
+    handle_duty_text_input,
 )
-from bot.env import CHANNEL_ID, GROUP_ID
+from bot.handlers.response_handlers   import handle_wait_for_response
+from bot.handlers.problem_handlers    import handle_problem_solved_button
+from bot.handlers.parent_handlers     import (
+    handle_parent_call,
+    handle_child_name_input,
+    handle_child_choice,
+    handle_message_for_child_input,
+)
+from bot.handlers.team_handlers       import handle_team_choice
+from bot.handlers.tournament_handlers import handle_tournament_choice
+from bot.handlers.direction_handlers  import handle_direction_choice
+from bot.handlers.recipient_handlers  import handle_recipient_choice
+
+from bot.utils.keyboards.main_menu    import show_main_menu_in_chat
+from bot.common                       import load_users_data_async
+from bot.config                       import (
+    INPUT_MESSAGE,
+    INPUT_STUDENT_INFO,
+    INPUT_DUTY_TEXT,
+    INPUT_CHILD_NAME,
+    INPUT_MESSAGE_FOR_CHILD,
+    CODE_INPUT,
+    WAIT_FOR_RESPONSE,
+    PARENTS_ACTION,
+    STUDENTS_ACTION,
+    STAFF_ACTION,
+    DIRECTOR_ACTION,
+)
+from bot.env                          import CHANNEL_ID, GROUP_ID
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +59,7 @@ async def inline_button_handler(
     await query.answer()
     data = query.data or ""
 
-    # 1) problem_solved_… обрабатываем в своём хендлере
+    # 1) problem_solved_… 
     if data.startswith("problem_solved_"):
         return await handle_problem_solved_button(update, context)
 
@@ -58,17 +77,15 @@ async def inline_button_handler(
     if data == CODE_INPUT:
         return await handle_code_input(update, context)
 
-    # 5) категория «дирекция/сотрудники/…»  
+    # 5) возврат в меню дирекции/сотрудников/…
     if data in {"back_to_director", "back_to_staff", "back_to_parents", "back_to_students"}:
-        # просто посылаем нужное меню
         if data == "back_to_director":
-            return await director_announcement(update, context)  # или show_director_menu
+            return await director_announcement(update, context)
         if data == "back_to_staff":
-            return await staff_write_message(update, context)    # или show_staff_menu
-        if data == "back_to_parents":
-            from bot.handlers.menu_handlers import staff_write_message  # пример
             return await staff_write_message(update, context)
-        # … аналогично для студентов
+        if data == "back_to_parents":
+            return await staff_write_message(update, context)
+        # back_to_students — завешаем диалог, т.к. обработчик не определён
         return ConversationHandler.END
 
     # 6) назначение наряда
@@ -96,7 +113,7 @@ async def inline_button_handler(
     # 11) родители → звонок ребёнку
     if data == "parent_call":
         return await handle_parent_call(update, context)
-
+        
     # 12) выбор ребёнка
     if data.startswith("select_child_"):
         return await handle_child_choice(update, context)
@@ -111,7 +128,6 @@ async def inline_button_handler(
     if data.startswith("tournament_"):
         return await handle_tournament_choice(update, context)
     if data.startswith("back_to_message_options"):
-        from bot.handlers.team_handlers import handle_team_choice
         return await handle_team_choice(update, context)
     if data.startswith("write_to_department"):
         return await handle_direction_choice(update, context)
@@ -119,9 +135,13 @@ async def inline_button_handler(
     # 15) выбор получателя
     if data in {"write_to_director", "write_to_all_staff"}:
         return await handle_recipient_choice(update, context)
-    if data.startswith("write_to_department") or data.startswith("write_to_team_leaders") or data.startswith("write_to_tournament_judges"):
+    if (
+        data.startswith("write_to_department")
+        or data.startswith("write_to_team_leaders")
+        or data.startswith("write_to_tournament_judges")
+    ):
         return await handle_recipient_choice(update, context)
 
-    # 16) если ничего не подошло
+    # 16) fallback
     await query.edit_message_text(f"Вы выбрали опцию: {data}")
     return ConversationHandler.END
