@@ -95,16 +95,15 @@ async def start_bot():
         .build()
     )
 
-    # 2) Регистрируем основные хендлеры
-    application.add_handler(CommandHandler("start", handle_start))
-    application.add_handler(CallbackQueryHandler(inline_button_handler))
+    await application.bot.set_my_commands([
+        BotCommand("start", "Запустить бота"),
+        BotCommand("help",  "Помощь"),
+    ])
 
-    # 3) ConversationHandler для состояний диалога
+    # 2) ConversationHandler — ловит всё, что происходит внутри диалога
     conv = ConversationHandler(
         entry_points=[
             CommandHandler("start", handle_start),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_category),
-            CallbackQueryHandler(inline_button_handler),
         ],
         states={
             CODE_INPUT:            [MessageHandler(filters.TEXT, handle_code_input)],
@@ -129,23 +128,29 @@ async def start_bot():
             CHOOSE_CHILD:          [CallbackQueryHandler(handle_child_choice, pattern="^select_child_")],
             INPUT_MESSAGE_FOR_CHILD: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message_for_child_input)],
         },
-        fallbacks=[CommandHandler("start", handle_category)],
+        fallbacks=[
+            CommandHandler("start", handle_start),
+        ],
+        # per_chat=True или False по необходимости
     )
     application.add_handler(conv)
-    application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_category)
-    )
 
-    await application.bot.set_my_commands([
-        BotCommand("start", "Запустить бота"),
-        BotCommand("help", "Получить справку")
-    ])
+    # 3) Отдельно CommandHandler для /start (если хотите, чтобы /start работал и вне conv)
+    application.add_handler(CommandHandler("start", handle_start))
 
-    # 4) Дополнительные CallbackQueryHandler-ы
+    # 4) Inline‑query‑хендлеры
+    application.add_handler(CallbackQueryHandler(inline_button_handler))
     application.add_handler(CallbackQueryHandler(handle_news, pattern="^news$"))
     application.add_handler(CallbackQueryHandler(handle_problem_solved_button, pattern="^problem_solved_"))
 
-    # 5) Инициализируем и запускаем polling без закрытия event loop
+    # 5) Отладочный хендлер для логирования всех апдейтов
+    class DebugHandler(BaseHandler):
+        async def check_update(self, update):
+            logger.debug(f"[DEBUG] Update received: {update}")
+            return False
+    application.add_handler(DebugHandler())
+
+    # 6) Инициализируем и запускаем polling без закрытия event loop
     await application.initialize()
     await application.start()
     await application.updater.start_polling()
