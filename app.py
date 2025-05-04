@@ -157,10 +157,3 @@ async def start_bot():
     application.updater.idle()
 
     logger.info("Telegram bot started polling in background.")
-
-    class DebugHandler(BaseHandler):
-        async def check_update(self, update):
-            print(f"[DEBUG] Получен update: {update}")
-            return False  # не обрабатываем, просто логируем
-    
-    application.add_handler(DebugHandler())
