@@ -52,9 +52,15 @@
 
 * Колонка "праздник" -- ответственны ли Вы за праздник (пока ненужная колонка, мб ее в будущем удалим): 0 -- нет, 1 -- да;
 
-**Шаг 2.** Добавьтесь в технический канал: https://t.me/+6U2YMfGLviwxNzAy — можете сразу отправить его в архив, он вам не понадобится!
+**Шаг 2.** Добавьтесь в технический канал: https://t.me/+6U2YMfGLviwxNzAy (и в связанный с ним чат, чтобы иметь возможность комментировать сообщения) — можете сразу отправить его в архив, он вам не понадобится!
 
 **Шаг 3.** Напишите боту!
+
+# Сторонние гугл таблицы
+
+* [https://docs.google.com/spreadsheets/d/1dsDE2ydedzEAwdtHJESx39o5Clb2cEnV5ySAGFjW_eQ/edit?gid=0#gid=0](https://docs.google.com/spreadsheets/d/1dsDE2ydedzEAwdtHJESx39o5Clb2cEnV5ySAGFjW_eQ/edit?usp=sharing) -- таблица с информацией о школьниках (колонка "телефон" пока нигде использована не была)
+
+* [https://docs.google.com/spreadsheets/d/1YOMc2k5hTNFMYeie_zbDLjMqmBRPGPKKSD8r6Tr9R9Y/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1YOMc2k5hTNFMYeie_zbDLjMqmBRPGPKKSD8r6Tr9R9Y/edit?usp=sharing) -- таблица с новостями: какие турниры, какие вечерние мероприятия и т.д.
 
 # С чем можно помочь?
 
