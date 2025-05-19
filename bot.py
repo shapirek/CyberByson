@@ -982,9 +982,12 @@ def send_message_with_button(update: Update, context: CallbackContext, recipient
 
     # Отправляем сообщение в канал и получаем его ID и thread_id
     send_message_to_channel(context, message_text, sender['имя'], sender['фамилия'], sender['статус'], recipient_type, **kwargs)
-    message_id = context.user_data.get('channel_message_id')
-    thread_id = context.user_data.get('thread_id')
-    thread_url = f"https://t.me/c/{CHANNEL_LINK_PART}/{message_id}?thread={thread_id}"
+    unique_id = context.user_data.get('current_message_id')
+    message_data = context.user_data.get(unique_id, {})
+    channel_message_id = message_data.get('channel_message_id')
+    thread_id = message_data.get('thread_id')
+    
+    thread_url = f"https://t.me/c/{CHANNEL_LINK_PART}/{channel_message_id}?thread={thread_id}" # thread_url = f"https://t.me/c/{CHANNEL_LINK_PART}/{message_id}?thread={thread_id}"
 
     # Формируем сообщение с подписью и тегами
     formatted_message = format_message_with_signature(
