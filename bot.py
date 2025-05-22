@@ -1911,8 +1911,18 @@ def main() -> None:
     # Добавляем общий обработчик для остальных callback_data
     dp.add_handler(CallbackQueryHandler(inline_button_handler))
 
-    updater.start_polling()
-    updater.idle()
+    # updater.start_polling()
+    # updater.idle()
+
+    port = int(os.environ.get("PORT", 5000))
+    updater.start_webhook(
+         listen="0.0.0.0",
+         port=port,
+         url_path=TOKEN,
+    )
+     # Регистрируем webhook в Telegram
+     updater.bot.set_webhook(f"https://{os.environ['cyberbyson-pre-alpha.onrender.com']}/{TOKEN}")
+     updater.idle()
 
 app = Flask(__name__)
 
