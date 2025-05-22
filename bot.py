@@ -1925,6 +1925,10 @@ def index():
     # Указываем прослушивание на всех интерфейсах (0.0.0.0)
     # pass # app.run(host="0.0.0.0", port=port, use_reloader=False)
 
+@app.route("/health")
+def health():
+    return "OK", 200
+
 threading.Thread(target=main, daemon=True).start()
 
 if __name__ == "__main__":
