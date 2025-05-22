@@ -1921,10 +1921,10 @@ def main() -> None:
          port=port,
          url_path=TOKEN,
     )
-     # Регистрируем webhook в Telegram
-     hostname = os.environ['RENDER_EXTERNAL_HOSTNAME']
-     updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
-     updater.idle()
+    # Регистрируем webhook в Telegram
+    hostname = os.environ['RENDER_EXTERNAL_HOSTNAME']
+    updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
+    updater.idle()
 
 app = Flask(__name__)
 
