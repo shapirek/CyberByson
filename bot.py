@@ -1920,14 +1920,16 @@ app = Flask(__name__)
 def index():
     return "Сервис работает", 200
 
-def run_server():
-    port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения, по умолчанию 5000
+# def run_server():
+    # port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения, по умолчанию 5000
     # Указываем прослушивание на всех интерфейсах (0.0.0.0)
-    pass # app.run(host="0.0.0.0", port=port, use_reloader=False)
+    # pass # app.run(host="0.0.0.0", port=port, use_reloader=False)
+
+threading.Thread(target=main, daemon=True).start()
 
 if __name__ == "__main__":
     # Запускаем сервер в отдельном потоке, чтобы не блокировать основной процесс бота
-    # server_thread = threading.Thread(target=run_server)
+    # server_thread = threading.Thread(target=main, daemon=True).start()
     # server_thread.daemon = True  # Делает поток демоном, чтобы он завершался вместе с основным процессом
     # server_thread.start()
 
