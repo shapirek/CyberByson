@@ -1915,15 +1915,16 @@ def main() -> None:
     # updater.start_polling()
     # updater.idle()
 
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 443))
+    hostname = os.environ[RENDER_EXTERNAL_HOSTNAME]
     updater.start_webhook(
          listen="0.0.0.0",
          port=port,
          url_path=TOKEN,
+         webhook_url=f"https://{hostname}/{TOKEN}"
     )
     # Регистрируем webhook в Telegram
-    hostname = os.environ[RENDER_EXTERNAL_HOSTNAME]
-    updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
+    # updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
     updater.idle()
 
 app = Flask(__name__)
