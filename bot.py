@@ -52,7 +52,7 @@ CHANNEL_ID = '-1002429128033'
 CHANNEL_LINK_PART = "2429128033"
 GROUP_ID = '-1002427182837'
 TIMEZONE = pytz.timezone('Asia/Novosibirsk')
-# RENDER_EXTERNAL_HOSTNAME = 'cyberbyson-pre-alpha.onrender.com'
+RENDER_EXTERNAL_HOSTNAME = 'cyberbyson-pre-alpha.onrender.com'
 
 CODE_INPUT = 0
 DIRECTOR_ACTION = 1
