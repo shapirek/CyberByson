@@ -1916,7 +1916,7 @@ def main() -> None:
     # updater.idle()
 
     port = int(os.environ.get("PORT", 443))
-    hostname = os.environ["RENDER_EXTERNAL_HOSTNAME"]
+    hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "cyberbyson-pre-alpha.onrender.com")
     updater.start_webhook(
          listen="0.0.0.0",
          port=port,
