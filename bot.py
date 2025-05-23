@@ -1865,7 +1865,7 @@ def inline_button_handler(update: Update, context: CallbackContext) -> int:
         query.edit_message_text(f"Вы выбрали опцию: {data}")
         return ConversationHandler.END  # Сбрасываем состояние после выполнения действия
 
-def main() -> None:
+def main() -> Updater:
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
 
@@ -1937,6 +1937,9 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     return "Сервис работает", 200
+
+updater = main()
+dp: Dispatcher = updater.dispatcher
 
 @app.route(f"/{TOKEN}", methods=["POST"])
 def telegram_webhook() -> str:
