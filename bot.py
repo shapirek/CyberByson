@@ -1915,23 +1915,36 @@ def main() -> None:
     # updater.start_polling()
     # updater.idle()
 
-    port = int(os.environ.get("PORT", 443))
-    hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "cyberbyson-pre-alpha.onrender.com")
-    updater.start_webhook(
-         listen="0.0.0.0",
-         port=port,
-         url_path=TOKEN,
-         webhook_url=f"https://{hostname}/{TOKEN}"
-    )
+    # port = int(os.environ.get("PORT", 443))
+    # hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "cyberbyson-pre-alpha.onrender.com")
+    # updater.start_webhook(
+         # listen="0.0.0.0",
+         # port=port,
+         # url_path=TOKEN,
+         # webhook_url=f"https://{hostname}/{TOKEN}"
+    # )
     # Регистрируем webhook в Telegram
     # updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
-    updater.idle()
+    # updater.idle()
+
+    # выставляем webhook в Telegram (без порта в URL)
+    hostname = os.environ["RENDER_EXTERNAL_HOSTNAME"]
+    updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
+    return updater
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
     return "Сервис работает", 200
+
+@app.route(f"/{TOKEN}", methods=["POST"])
+def telegram_webhook() -> str:
+    # Пришёл апдейт от Telegram — передаём его в dispatcher
+    data = request.get_json(force=True)
+    update = Update.de_json(data, updater.bot)
+    dp.process_update(update)
+    return "OK"
 
 # def run_server():
     # port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения, по умолчанию 5000
@@ -1951,5 +1964,6 @@ if __name__ == "__main__":
     # server_thread.start()
 
     # Здесь запускается ваш основной код бота
-    print("Бот запущен!")
-    main()
+    # print("Бот запущен!")
+    # main()
+     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 443)))
