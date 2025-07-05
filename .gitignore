@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 *.pyo
 credentials.json  # Файл ключей Google
+*.json
+service-account-*.json
