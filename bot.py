@@ -55,7 +55,6 @@ GROUP_ID = '-1002427182837'
 TIMEZONE = pytz.timezone('Asia/Novosibirsk')
 RENDER_EXTERNAL_HOSTNAME = 'cyberbyson-pre-alpha.onrender.com'
 
-CODE_INPUT = 0
 DIRECTOR_ACTION = 1
 STAFF_ACTION = 2
 CHOOSE_RECIPIENT = 3
@@ -99,14 +98,14 @@ def read_google_sheet(sheet_url):
     for row in reader:
         if len(row) >= 9:  # Убедимся, что строка содержит все необходимые колонки
             user = {
-                'код': row[0],        # 1-ая колонка
-                'id': row[1],         # 2-ая колонка (ID телеграма)
-                'имя': row[2],        # 3-я колонка
-                'фамилия': row[3],    # 4-ая колонка (фамилия)
-                'статус': row[4],     # 5-ая колонка
+                'код': row[0].strip(), # 1-ая колонка
+                'id': user_id,         # 2-ая колонка (ID телеграма)
+                'имя': row[2],         # 3-я колонка
+                'фамилия': row[3],     # 4-ая колонка (фамилия)
+                'статус': row[4],      # 5-ая колонка
                 'направление': row[5], # 6-ая колонка
-                'команда': row[6],    # 7-ая колонка (команда)
-                'судья': row[7],      # 8-ая колонка (судья)
+                'команда': row[6],     # 7-ая колонка (команда)
+                'судья': row[7],       # 8-ая колонка (судья)
                 'технозондер': row[8], # 9-ая колонка (технозондер)
                 'псин': row[9] # 10-ая колонка (псин)
             }
@@ -202,13 +201,15 @@ def normalize_table_date(date_str: str) -> str:
 # Функция обработки команды /start. Отправляем приветственное сообщение и показываем главное меню.
 def start(update: Update, context: CallbackContext) -> int:
     # Сбрасываем все данные пользователя
-    context.user_data.clear()
-
-    # Отправляем приветственное сообщение и показываем главное меню
+    context.user_data.clear()  # Уже есть, оставить
+    
+    # Добавить сброс глобальной переменной
+    global users_data
+    users_data = []  # Добавить эту строку
+    
     update.message.reply_text("Приветствуем, кожаный мешок!")
     show_main_menu(update, context)
-
-    return ConversationHandler.END  # Сбрасываем состояние
+    return ConversationHandler.END
 
 # Главное меню – используется клавиатура первого типа (ReplyKeyboardMarkup)
 # Главное меню – используется клавиатура первого типа (ReplyKeyboardMarkup)
@@ -268,6 +269,9 @@ def show_students_menu(update: Update, context: CallbackContext) -> int:
     return STUDENTS_ACTION  # Возвращаем состояние меню школьников
 
 def show_director_menu(update: Update, context: CallbackContext) -> int:
+    if 'code' not in context.user_data:
+        show_main_menu(update, context)
+        return ConversationHandler.END
     # Проверяем, есть ли сообщение в update
     if update.message:
         chat_id = update.message.chat_id
@@ -289,6 +293,9 @@ def show_director_menu(update: Update, context: CallbackContext) -> int:
     return DIRECTOR_ACTION
 
 def show_staff_menu(update: Update, context: CallbackContext) -> int:
+    if 'code' not in context.user_data:
+        show_main_menu(update, context)
+        return ConversationHandler.END
     # Проверяем, есть ли сообщение в update
     if update.message:
         chat_id = update.message.chat_id
@@ -1254,30 +1261,6 @@ def handle_problem_solved(update: Update, context: CallbackContext, unique_id: s
     # Удаляем данные для этого сообщения
     context.user_data.pop(unique_id, None)
 
-def handle_code_input(update: Update, context: CallbackContext) -> int:
-    input_code = update.message.text
-
-    # Ищем пользователя по коду (1-ая колонка)
-    user = next((u for u in users_data if str(u['код']) == input_code), None)
-
-    if not user:
-        update.message.reply_text("❌ Неверный код доступа!")
-        show_main_menu(update, context)
-        return ConversationHandler.END
-
-    # Сохраняем код пользователя в context.user_data
-    context.user_data['code'] = input_code
-
-    status = user.get('статус')
-    if status == '0':  # Дирекция
-        return show_director_menu(update, context)
-    elif status == '1':  # Сотрудники
-        return show_staff_menu(update, context)
-    else:
-        update.message.reply_text("⚠️ Неизвестный статус пользователя!")
-        show_main_menu(update, context)
-        return ConversationHandler.END
-
 def handle_input_message(update: Update, context: CallbackContext) -> int:
     # Сохраняем текст сообщения в context.user_data
     context.user_data['message_text'] = update.message.text
@@ -1306,12 +1289,34 @@ def handle_category(update: Update, context: CallbackContext) -> int:
         return show_students_menu(update, context)  # Возвращаем состояние STUDENTS_ACTION
     elif category == 'Сотрудники':
         try:
-            # Загружаем таблицу при выборе "Сотрудники"
+            # Загружаем таблицу
             global users_data
             users_data = read_google_sheet(TABULA)
-            print("Данные успешно загружены!")
-            update.message.reply_text("Укажите Ваш код доступа:")
-            return CODE_INPUT  # Переходим в состояние ввода кода
+            
+            # Получаем ID текущего пользователя
+            user_id = str(update.effective_user.id)
+            
+            # Ищем пользователя в таблице по ID
+            user = next((u for u in users_data if u['id'] == user_id), None)
+            
+            if user:
+                # Сохраняем код пользователя
+                context.user_data['code'] = user['код']
+                status = user.get('статус')
+                
+                if status == '0':
+                    return show_director_menu(update, context)
+                elif status == '1':
+                    return show_staff_menu(update, context)
+                else:
+                    update.message.reply_text("⚠️ Ваш статус не определен. Обратитесь к дирекции.")
+                    show_main_menu(update, context)
+                    return ConversationHandler.END
+            else:
+                update.message.reply_text("❌ Ваш ID не найден в списке сотрудников. Обратитесь к дирекции.")
+                show_main_menu(update, context)
+                return ConversationHandler.END
+                
         except Exception as e:
             print(f"Ошибка при загрузке данных: {e}")
             update.message.reply_text("⚠️ Ошибка загрузки данных. Попробуйте позже.")
@@ -1881,7 +1886,6 @@ def main() -> Updater:
             CallbackQueryHandler(inline_button_handler)
         ],
         states={
-            CODE_INPUT: [MessageHandler(Filters.text, handle_code_input)],
             DIRECTOR_ACTION: [CallbackQueryHandler(inline_button_handler)],
             STAFF_ACTION: [CallbackQueryHandler(inline_button_handler)],
             STUDENTS_ACTION: [CallbackQueryHandler(inline_button_handler)],  # Добавлено
