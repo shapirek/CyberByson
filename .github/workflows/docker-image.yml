@@ -1,0 +1,23 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "prod" ]
+  pull_request:
+    branches: [ "prod" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: docker login
+      env:
+        USER: ${{secrets.DOCKER_USER}}
+        PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: docker login -u $USER -p $PASSWORD
+    - name: Build the Docker image and push
+      run: docker build . -t skabrits/cyberbyson-bot:$(cat tag) -t skabrits/cyberbyson-bot:latest && docker push skabrits/cyberbyson-bot --all-tags
