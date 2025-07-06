@@ -20,4 +20,6 @@ jobs:
         PASSWORD: ${{secrets.DOCKER_PASSWORD}}
       run: docker login -u $USER -p $PASSWORD
     - name: Build the Docker image and push
-      run: docker build . -t skabrits/cyberbyson-bot:$(cat tag) -t skabrits/cyberbyson-bot:latest && docker push skabrits/cyberbyson-bot --all-tags
+      env:
+        USER: ${{secrets.DOCKER_USER}}
+      run: docker build . -t ${USER}/cyberbyson-bot:$(grep "tag:" cyberbyson-bot/values.yaml | awk '{print $2}' | tr -d '"') -t ${USER}/cyberbyson-bot:latest && docker push ${USER}/cyberbyson-bot --all-tags
