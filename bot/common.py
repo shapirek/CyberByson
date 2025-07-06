@@ -80,12 +80,18 @@ async def _fetch_raw_data() -> str:
             encoding = chardet.detect(raw_data)['encoding']
             return raw_data.decode(encoding)
 
+# Замените функцию get_cached_users_data
 def get_cached_users_data() -> List[Dict]:
-    """Получение кэшированных данных с проверкой TTL"""
-    cache =  getattr(_parse_and_cache, 'cache', None)
-    if not cache:
+    """Получение кэшированных данных с проверкой времени"""
+    if not hasattr(_parse_and_cache, 'cache_info'):
         return None
-    return next(iter(cache.values()))
+        
+    cache_info = _parse_and_cache.cache_info()
+    if cache_info.hits == 0 and cache_info.misses == 0:  # Кэш пустой
+        return None
+        
+    # Возвращаем последний закэшированный результат
+    return _parse_and_cache.cache_info().cache.values()[0]
 
 def get_fallback_data() -> List[Dict]:
     """Резервные данные на случай ошибок"""
