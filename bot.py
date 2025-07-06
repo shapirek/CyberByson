@@ -1934,7 +1934,10 @@ def main() -> Updater:
 
     # выставляем webhook в Telegram (без порта в URL)
     hostname = os.environ["RENDER_EXTERNAL_HOSTNAME"]
-    updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
+    try:
+        updater.bot.set_webhook(f"https://{hostname}/{TOKEN}")
+    except Exception:
+        logger.error(f"https://{hostname}/{TOKEN}")
     return updater
 
 app = Flask(__name__)

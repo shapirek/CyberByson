@@ -8,4 +8,4 @@ COPY bot.py .
 
 EXPOSE 80
 
-CMD [ "gunicorn", "bot:app", "--workers=1", "--bind", "0.0.0.0:80" ]
+CMD [ "gunicorn", "bot:app", "--workers=1", "--bind", "0.0.0.0:80", "--capture-output", "--access-logfile", "-", "--error-logfile", "-" ]
