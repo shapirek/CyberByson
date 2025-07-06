@@ -136,12 +136,12 @@ async def start_bot():
     application.add_handler(conv)
 
     # 3) Отдельно CommandHandler для /start (если хотите, чтобы /start работал и вне conv)
-    application.add_handler(CommandHandler("start", handle_start))
+    # application.add_handler(CommandHandler("start", handle_start))
 
     # 4) Inline‑query‑хендлеры
-    application.add_handler(CallbackQueryHandler(inline_button_handler))
     application.add_handler(CallbackQueryHandler(handle_news, pattern="^news$"))
     application.add_handler(CallbackQueryHandler(handle_problem_solved_button, pattern="^problem_solved_"))
+    application.add_handler(CallbackQueryHandler(inline_button_handler, pattern=None))
 
     # 5) Отладочный хендлер для логирования всех апдейтов
     class DebugHandler(BaseHandler):
