@@ -127,6 +127,8 @@ async def start_bot():
             INPUT_CHILD_NAME:      [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_child_name_input)],
             CHOOSE_CHILD:          [CallbackQueryHandler(handle_child_choice, pattern="^select_child_")],
             INPUT_MESSAGE_FOR_CHILD: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message_for_child_input)],
+            PARENTS_MENU: [CallbackQueryHandler(inline_button_handler)],
+            STUDENTS_MENU: [CallbackQueryHandler(inline_button_handler)],
         },
         fallbacks=[
             CommandHandler("start", handle_start),
